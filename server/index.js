@@ -14,7 +14,10 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: "http://localhost:5173", // <-- your React dev URL
+    origin: [
+      "http://localhost:5173",
+      "https://react-ai-chatbot-qsss.onrender.com",
+    ], // <-- your React dev URL
     credentials: true, // <-- allow the session cookie
   })
 );
