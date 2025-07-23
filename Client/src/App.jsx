@@ -44,7 +44,10 @@ function App() {
   const endOfMessages = useRef(null);
 
   const currentChat = chats.find((chat) => chat.id === currentChatId);
-  const messages = currentChat?.messages || [];
+  const messages = React.useMemo(
+    () => currentChat?.messages || [],
+    [currentChat]
+  );
 
   // Fetch server session only if no local chats exist
   useEffect(() => {
@@ -85,12 +88,14 @@ function App() {
       }, 3000);
       return () => clearInterval(interval);
     }
-  }, [messages.length]);
+  }, [messages.length, welcomeMessages.length]);
 
   // Auto-scroll to bottom
   useEffect(() => {
     endOfMessages.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
+
+  const [showSidebar, setShowSidebar] = useState(false);
 
   // End-session beacon
   useEffect(() => {
@@ -204,20 +209,81 @@ function App() {
   };
 
   return (
-    <div className="h-screen flex bg-gray-900">
-      <div className="w-1/5">
+    <div className="h-screen flex flex-col md:flex-row bg-gray-900 relative">
+      {/* Mobile Top Bar */}
+      <div className="md:hidden flex items-center justify-between px-4 py-3 bg-gray-900 border-b border-gray-700">
+        <button
+          onClick={() => setShowSidebar(!showSidebar)}
+          className="text-white text-2xl"
+        >
+          ☰
+        </button>
+        <h1 className="text-white font-semibold">AI-CHATBOT</h1>
+      </div>
+
+      {/* Sidebar */}
+      <div
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-gray-800 transform transition-transform duration-300 ease-in-out
+        ${
+          showSidebar ? "translate-x-0" : "-translate-x-full"
+        } md:relative md:translate-x-0 md:w-1/5 md:flex`}
+      >
         <Sidebar
           chats={chats}
           currentChatId={currentChatId}
-          onSelectChat={handleSelectChat}
+          onSelectChat={(id) => {
+            handleSelectChat(id);
+            setShowSidebar(false); // auto-close sidebar on mobile
+          }}
           onNewChat={handleNewChat}
           onDeleteChat={handleDeleteChat}
+          isMobile={showSidebar}
+          onClose={() => setShowSidebar(false)}
         />
       </div>
-      <div className="flex-1 flex flex-col p-6">
-        <div className="flex-1 overflow-y-auto space-y-4 p-4">
+      {/* Sidebar Drawer */}
+      <div
+        className={`fixed inset-0 z-50 flex transform transition-transform duration-300 ease-in-out
+          ${showSidebar ? "translate-x-0" : "-translate-x-full"}
+        `}
+      >
+        {/* 1) Backdrop: dark, semi‑transparent, blurred */}
+        <div
+          className="absolute inset-0 bg-transparent bg-opacity-50 backdrop-blur-sm md:hidden"
+          onClick={() => setShowSidebar(false)}
+        />
+
+        {/* 2) Sidebar panel: semi‑opaque on mobile, solid on desktop */}
+        <div className="relative w-64 h-full bg-gray-800 bg-opacity-90 md:bg-opacity-100 md:w-1/5">
+          <Sidebar
+            chats={chats}
+            currentChatId={currentChatId}
+            onSelectChat={(id) => {
+              handleSelectChat(id);
+              setShowSidebar(false);
+            }}
+            onNewChat={handleNewChat}
+            onDeleteChat={handleDeleteChat}
+            isMobile={showSidebar}
+            onClose={() => setShowSidebar(false)}
+          />
+        </div>
+      </div>
+
+      {/* Overlay (mobile) */}
+      {showSidebar && (
+        <div
+          className="fixed inset-0 bg-transparent bg-opacity-50 z-40 md:hidden"
+          onClick={() => setShowSidebar(false)}
+        />
+      )}
+
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col p-4 md:p-6 overflow-hidden">
+        {/* Message Area */}
+        <div className="flex-1 overflow-y-auto space-y-4 p-2 md:p-4">
           {messages.length === 0 ? (
-            <div className="text-center text-white text-4xl py-50 animate-fade-in">
+            <div className="text-center text-white text-3xl md:text-4xl py-16 animate-fade-in">
               {welcomeMessages[welcomeIndex]}
             </div>
           ) : (
@@ -228,7 +294,9 @@ function App() {
           {isTyping && <TypingIndicator />}
           <div ref={endOfMessages} />
         </div>
-        <div className="mt-4 flex items-center bg-gray-800 rounded-full border border-gray-700 p-2">
+
+        {/* Input Bar */}
+        <div className="bg-gray-800 rounded-full border border-gray-700 p-2 mt-4 flex items-center sticky bottom-2 md:static">
           <input
             type="text"
             className="flex-1 bg-transparent pl-4 outline-none text-white"
