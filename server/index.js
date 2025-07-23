@@ -32,7 +32,7 @@ mongoose.connect(process.env.MONGO_URI, {
 app.use(
   session({
     name: "sid",
-    secret: process.env.SESSION_SECRET || "change_this",
+    secret: process.env.SESSION_SECRET || "10.224.87.244",
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
