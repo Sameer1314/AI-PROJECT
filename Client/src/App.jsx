@@ -48,11 +48,12 @@ function App() {
     () => currentChat?.messages || [],
     [currentChat]
   );
+  const host = "10.224.87.244"; // your laptop's IP address
 
   // Fetch server session only if no local chats exist
   useEffect(() => {
     if (localStorage.getItem("chats")) return;
-    fetch("http://${host}:3001/messages", { credentials: "include" })
+    fetch(`http://${host}:3001/messages`, { credentials: "include" })
       .then((res) => res.json())
       .then((data) => {
         const sessionMsgs = data.map((m) => ({
@@ -100,7 +101,7 @@ function App() {
   // End-session beacon
   useEffect(() => {
     const handleBeforeUnload = () => {
-      navigator.sendBeacon("http://${host}:3001/end-session");
+      navigator.sendBeacon(`http://${host}:3001/end-session`);
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
@@ -110,7 +111,7 @@ function App() {
     if (!question.trim()) return;
     const userMessage = { role: "user", content: question };
     // Send user message to backend
-    await fetch("http://${host}:3001/messages", {
+    await fetch(`http://${host}:3001/messages`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -131,7 +132,7 @@ function App() {
     const assistantReply = data.candidates[0].content.parts[0].text.trim();
     const assistantMessage = { role: "assistant", content: assistantReply };
     // Save assistant message
-    await fetch("http://${host}:3001/messages", {
+    await fetch(`http://${host}:3001/messages`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
