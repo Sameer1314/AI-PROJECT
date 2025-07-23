@@ -283,7 +283,7 @@ function App() {
         {/* Message Area */}
         <div className="flex-1 overflow-y-auto space-y-4 p-2 md:p-4">
           {messages.length === 0 ? (
-            <div className="text-center text-white text-3xl md:text-4xl py-16 animate-fade-in">
+            <div className="text-center text-white text-3xl md:text-4xl py-40 animate-fade-in">
               {welcomeMessages[welcomeIndex]}
             </div>
           ) : (
