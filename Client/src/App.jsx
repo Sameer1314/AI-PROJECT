@@ -69,7 +69,7 @@ function App() {
         setCurrentChatId(sessionChat.id);
       })
       .catch(() => {});
-  }, []);
+  }, [host]);
 
   // Persist chats
   useEffect(() => {
@@ -105,7 +105,7 @@ function App() {
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, []);
+  }, [host]);
 
   const askQuestion = async () => {
     if (!question.trim()) return;
