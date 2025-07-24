@@ -15,8 +15,8 @@ app.use(express.json());
 app.use(
   cors({
     origin: [
-      "http://10.224.87.244",
       "https://react-ai-chatbot-qsss.onrender.com",
+      "http://localhost:5173",
     ], // <-- your React dev URL
     credentials: true, // <-- allow the session cookie
   })
@@ -32,7 +32,7 @@ mongoose.connect(process.env.MONGO_URI, {
 app.use(
   session({
     name: "sid",
-    secret: process.env.SESSION_SECRET || "10.224.87.244",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
@@ -42,6 +42,8 @@ app.use(
     }),
     cookie: {
       httpOnly: true,
+      secure: true,
+      sameSite: "none",
       // no maxAge -> session cookie
     },
   })
@@ -107,4 +109,6 @@ app.get("/new-session", (req, res) => {
   res.json({ sessionId });
 });
 
-app.listen(3001, () => console.log("Server running on port 3001"));
+app.listen(3001, "0.0.0.0", () => {
+  console.log("Server running on http://0.0.0.0:3001");
+});
